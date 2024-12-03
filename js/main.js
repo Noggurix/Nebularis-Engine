@@ -1,15 +1,20 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js';
+import * as THREE from 'three';
+import { UnrealBloomPass } from 'UnrealBloomPass';
+import { EffectComposer } from 'EffectComposer';
+import { RenderPass } from 'RenderPass';
 import CameraControls from './cameraControl.js';
 
 const scene = new THREE.Scene(); //Cria uma cena
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000); //Define uma câmera
+
+
 const renderer = new THREE.WebGLRenderer({ antialias: true }); //Define um renderizador
 renderer.setSize(window.innerWidth, window.innerHeight); //Define a área de renderização com a largura e altura do navegador
 document.body.appendChild(renderer.domElement); //Adiciona o elemento gerado pelo renderizador ao body desse arquivo
 
-const cameraControls = new CameraControls(camera, document);
+const cameraControls = new CameraControls(camera, document); //Carrega o script de controle de câmera
 
-// Carregar skybox
+//Define as imagens do skybox
 const loader = new THREE.CubeTextureLoader();
 const skyboxTexture = loader.load([
   "skybox/posX.jpg", "skybox/negX.jpg",
@@ -20,65 +25,75 @@ scene.background = skyboxTexture;
 
 const textureLoader = new THREE.TextureLoader();
 
-// Sol
-const sunTexture = textureLoader.load("textures/sun.jpg");
-const sunMaterial = new THREE.MeshBasicMaterial({
+const sunTexture = textureLoader.load("textures/sun/sun.jpg"); //Carrega a textura do sol
+
+const sunMaterial = new THREE.MeshBasicMaterial({  //Define o material do sol
   map: sunTexture,
-  emissive: new THREE.Color(0xFFFF00), // A cor do brilho emitido pelo Sol
-  emissiveIntensity: 1.5, // Intensidade do brilho do Sol
+  emissive: new THREE.Color(1, 1, 1), // Emissão branca
+  emissiveIntensity: 0.1, // Intensidade de emissão controlada
 });
 
-const sun = new THREE.Mesh(new THREE.SphereGeometry(10, 128, 128), sunMaterial);
+const sun = new THREE.Mesh(new THREE.SphereGeometry(10, 64, 64), sunMaterial); //Cria o objeto sol já definindo sua geometria e material
 scene.add(sun);
 
-const light = new THREE.PointLight(0xffffff, 1000); // Intensity aumentada
+//Cria uma luz e a define no sol
+const light = new THREE.PointLight(0xffffff, 500);
 light.position.set(0, 0, 0);
 scene.add(light);
 
-// Carregar texturas para os planetas
+// Carregar texturas dos planetas
 const planetTextures = {
-  Mercury: textureLoader.load("textures/mercury.jpg"),
-  Venus: textureLoader.load("textures/venus.jpg"),
-  Earth: textureLoader.load("textures/earth_daymap.jpg"),
-  Mars: textureLoader.load("textures/mars.jpg"),
+  Mercury: textureLoader.load("textures/mercury/mercury.jpg"),
+  Venus: textureLoader.load("textures/venus/venus.jpg"),
+  Earth: textureLoader.load("textures/earth/earth_daymap.jpg"),
+  Mars: textureLoader.load("textures/mars/mars.jpg"),
 };
 
-const scaleFactor = 50; // Escala para distâncias mais amplas
+const scaleFactor = 50;
 
-// Planetas
+//Propriedades dos planetas
 const planetsData = [
-  { name: "Mercury", texture: "Mercury", distance: 0.39 * scaleFactor, size: 0.5, period: 88 },
-  { name: "Venus", texture: "Venus", distance: 0.72 * scaleFactor, size: 1, period: 225 },
-  { name: "Earth", texture: "Earth", distance: 1.00 * scaleFactor, size: 1.2, period: 365.25 },
-  { name: "Mars", texture: "Mars", distance: 1.52 * scaleFactor, size: 0.8, period: 687 },
+  { name: "Mercury", texture: "Mercury", distance: 0.72 * scaleFactor, size: 0.5, period: 88 },
+  { name: "Venus", texture: "Venus", distance: 0.96 * scaleFactor, size: 1, period: 225 },
+  { name: "Earth", texture: "Earth", distance: 1.34 * scaleFactor, size: 1.2, period: 365.25 },
+  { name: "Mars", texture: "Mars", distance: 1.86 * scaleFactor, size: 0.8, period: 687 },
 ];
 
 const planets = [];
 
 // Adicionar planetas
-planetsData.forEach(data => {
-  const material = new THREE.MeshStandardMaterial({ map: planetTextures[data.texture] });
-  const planet = new THREE.Mesh(new THREE.SphereGeometry(data.size, 64, 64), material);
+planetsData.forEach(data => { //Itera sobre planetsData
+  const material = new THREE.MeshStandardMaterial({ map: planetTextures[data.texture] }); //Define o material para os planetas
+  const planet = new THREE.Mesh(new THREE.SphereGeometry(data.size, 64, 64), material); //Define geometria para os planetas
   planet.userData = {
+    //Define distancia, ângulo, velocidade e periodo
     distance: data.distance,
-    angle: Math.random() * Math.PI * 2,  // Inicia a posição aleatoriamente
+    angle: Math.random() * Math.PI * 2,
     period: data.period,
-    speed: (2 * Math.PI) / data.period / 100 // Ajusta a velocidade com base no período (escala temporal)
+    speed: (2 * Math.PI) / data.period / 100,
   };
-  scene.add(planet);
-  planets.push(planet);
+  scene.add(planet); //Adiciona-os a cena
+  planets.push(planet); //Adiciona-os ao array
 });
 
-// Posição inicial da câmera
+//Posição da câmera inicial
 camera.position.set(0, 50, 100);
-cameraControls.cameraRotation.x = -Math.PI / 6;  // Olhar para baixo a 30 graus
+cameraControls.cameraRotation.x = -Math.PI / 6;
 cameraControls.cameraRotation.y = Math.atan2(-camera.position.x, -camera.position.z);
+
+// Configurações de bloom
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  1.3, 0.1, 0.2
+)
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(bloomPass);
 
 // Animação
 function animate() {
   requestAnimationFrame(animate);
-
-  cameraControls.update(); // Atualiza os controles da câmera
+  cameraControls.update();
 
   planets.forEach(planet => {
     const data = planet.userData; //Acessa userData
@@ -87,7 +102,7 @@ function animate() {
     planet.position.z = Math.sin(data.angle) * data.distance; //Define eixo z
   });
 
-  renderer.render(scene, camera); //Redesenha a cena
+  composer.render(); //Redesenha a cena
 }
 
 // Ajustar o canvas ao redimensionar
