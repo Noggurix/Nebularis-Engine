@@ -5,94 +5,92 @@ export default class CameraControls {
         this.camera = camera;
         this.domElement = domElement;
 
-        // Variáveis de controle
-        this.isDragging = false; //Está ou não arrastando
-        this.prevMousePosition = { x: 0, y: 0 }; //Atual posição do mouse
-        this.cameraRotation = { x: 0, y: 0 }; // Rotação da câmera
-        this.cameraSpeed = 0.2; //Velocidade
-        this.keys = { w: false, a: false, s: false, d: false }; //Teclas de movimentação
+        this.isDragging = false; // Rastreamento de arrasto do mouse
+        this.prevMousePosition = { x: 0, y: 0 }; // Posição anterior do mouse para calculo de deslocamento
+        this.cameraControlRotation = { x: 0, y: 0 }; // Estado interno de rotação
+        this.cameraSpeed = 0.2;
 
-        // Adiciona os event listeners
+        this.keys = { w: false, a: false, s: false, d: false }; // Teclas de movimentação
+
         this.initEventListeners();
     }
 
     initEventListeners() {
         // Eventos do mouse
         this.domElement.addEventListener('mousedown', (event) => {
-            if (event.button === 0) this.isDragging = true; //Se o botão esquerdo for clicado isDragging se torna True
-            this.prevMousePosition = { x: event.clientX, y: event.clientY }; //Entender posição atual do mouse
+            if (event.button === 0) this.isDragging = true; // Se o botão for clicado isDragging se torna True
+            this.prevMousePosition = { x: event.clientX, y: event.clientY }; // Guardar posição atual do mouse
         });
-
         this.domElement.addEventListener('mouseup', () => {
-            this.isDragging = false; //Se não houver clique no botão esquerdo desativa isDragging
+            this.isDragging = false; // Se não houver clique do botão desativa isDragging
         });
-
         this.domElement.addEventListener('mousemove', (event) => {
             if (this.isDragging) {
-                const deltaX = event.clientX - this.prevMousePosition.x; //Diferença entre a posição atual e anterior do eixo X
-                const deltaY = event.clientY - this.prevMousePosition.y; //Diferença entre a posição atual e anterior do eixo Y
+                // Diferenças entre a posição atual e anterior
+                const deltaX = event.clientX - this.prevMousePosition.x;
+                const deltaY = event.clientY - this.prevMousePosition.y;
 
                 // Atualiza a rotação da câmera com base no movimento do mouse
-                this.cameraRotation.y -= deltaX * 0.005 //(sensibilidade); // Rota horizontalmente com base na diferença de posição de deltaX
-                this.cameraRotation.x -= deltaY * 0.005; // Rota verticalmente com base na diferença de posição de deltaY
+                this.cameraControlRotation.y -= deltaX * 0.005; // Rota horizontalmente com base na diferença de posição de deltaX
+                this.cameraControlRotation.x -= deltaY * 0.005; // Rota verticalmente com base na diferença de posição de deltaY
 
-                // Limita a rotação no eixo X (vertical) entre -PI/2 e PI/2
-                this.cameraRotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.cameraRotation.x)); //Limita o eixo x e y da câmera
+                // Limita a rotação no eixo X entre -PI/2 e PI/2 (impede que a câmera "vire de cabeça para baixo")
+                this.cameraControlRotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.cameraControlRotation.x));
 
-                this.prevMousePosition = { x: event.clientX, y: event.clientY }; //Atualiza novamente a posição atual do mouse
+                this.prevMousePosition = { x: event.clientX, y: event.clientY }; // Guarda novamente a posição atual do mouse
             }
         });
-
-        //Pressionamento e liberação de teclas
+        // Eventos de teclado para movimentação
         this.domElement.addEventListener('keydown', (event) => {
             this.keys[event.key.toLowerCase()] = true;
         });
-
         this.domElement.addEventListener('keyup', (event) => {
             this.keys[event.key.toLowerCase()] = false;
         });
     }
 
-    update() {
-        const forward = new THREE.Vector3(); // Vetor para movimentos frente/trás
+    /**
+     * Atualiza a posição da câmera com base nas teclas pressionadas.
+     */
+    updatePosition() {
+        const forwardBackward = new THREE.Vector3(); // Vetor para movimentos frente/trás
         const lateral = new THREE.Vector3(); // Vetor para movimentos laterais
-        const up = new THREE.Vector3(); // Vetor para movimentos verticais (cima/baixo)
+        const up = new THREE.Vector3(); // Vetor para movimentos verticais
 
         // Movimentos laterais (X)
         if (this.keys.d) lateral.x -= this.cameraSpeed;
         if (this.keys.a) lateral.x += this.cameraSpeed;
 
         // Movimentos para frente/trás (Z)
-        if (this.keys.w) forward.z += this.cameraSpeed;
-        if (this.keys.s) forward.z -= this.cameraSpeed;
+        if (this.keys.w) forwardBackward.z += this.cameraSpeed;
+        if (this.keys.s) forwardBackward.z -= this.cameraSpeed;
 
         // Calcular o movimento de altura (Y)
-        const verticalMovementFactor = Math.sin(this.cameraRotation.x); // Isso cria um movimento contínuo baseado na inclinação
-        if (this.keys.w) {
-            up.y += this.cameraSpeed * verticalMovementFactor; // Move para cima se a câmera olhar para cima
-        }
+        const verticalMovementFactor = Math.sin(this.cameraControlRotation.x); // Isso cria um movimento contínuo baseado na inclinação
+        if (this.keys.w) up.y += this.cameraSpeed * verticalMovementFactor; // Se W estiver pressionado, move Y para cima ou baixo dependendo de verticalMovementFactor
+        if (this.keys.s) up.y -= this.cameraSpeed * verticalMovementFactor; // Mesmo comportamento acima porém para a tecla S
 
-        if (this.keys.s) {
-            up.y -= this.cameraSpeed * verticalMovementFactor; // Move para baixo se a câmera olhar para baixo
-        }
+        // Aplica a rotação da câmera aos vetores de movimento
+        forwardBackward.applyEuler(new THREE.Euler(0, this.cameraControlRotation.y, 0));
+        lateral.applyEuler(new THREE.Euler(0, this.cameraControlRotation.y, 0));
 
-        // Aplica a rotação do (Y) para o movimento de frente/trás
-        forward.applyEuler(new THREE.Euler(0, this.cameraRotation.y, 0));
+        // Atualiza a posição da câmera
+        this.camera.position.add(forwardBackward).add(lateral).add(up);
+    }
 
-        // Aplica a rotação do (Y) para o movimento lateral
-        lateral.applyEuler(new THREE.Euler(0, this.cameraRotation.y, 0));
-
-        // Move a câmera somando os vetores de movimento
-        this.camera.position.add(forward).add(lateral).add(up);
-
-        // Atualiza a orientação da câmera
-        this.camera.rotation.set(this.cameraRotation.x, this.cameraRotation.y, 0);
-
-        // Faz a câmera olhar para a posição desejada
+    /**
+     * Atualiza a rotação da câmera para olhar na direção desejada.
+     */
+    updateRotation() {
         this.camera.lookAt(
-            this.camera.position.x + Math.sin(this.cameraRotation.y),
-            this.camera.position.y + Math.sin(this.cameraRotation.x),
-            this.camera.position.z + Math.cos(this.cameraRotation.y)
+            this.camera.position.x + Math.sin(this.cameraControlRotation.y),
+            this.camera.position.y + Math.sin(this.cameraControlRotation.x),
+            this.camera.position.z + Math.cos(this.cameraControlRotation.y)
         );
+    }
+
+    update() {
+        this.updatePosition();
+        this.updateRotation();
     }
 }
