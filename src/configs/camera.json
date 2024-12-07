@@ -1,0 +1,8 @@
+{
+    "cameraProperties": { 
+        "fov": 50,
+        "aspect": "window.innerWidth / window.innerHeight",
+        "near": 0.1,
+        "far": 2000
+    }
+}
