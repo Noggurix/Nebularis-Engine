@@ -2,7 +2,7 @@
 
 <h1 align="center">Nebularis Engine</h1>
 
-<p align=center>Nebularis Engine allows the user to create and simulate space experiences, featuring realistic physics and orbital calculation of celestial bodies.</p>
+<p align=center>Nebularis Engine allows the user to create and simulate space experiences with realistic physics and orbital calculation of celestial bodies.</p>
 
 ## Currently, **Nebularis Engine** provides the following:
 
