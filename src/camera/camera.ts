@@ -1,10 +1,12 @@
-import * as THREE from 'three'
-import CONFIG from './configs/camera.json' with  { type: 'json' };
+import * as THREE from 'three';
+import CONFIG from '../configs/camera.json' with  { type: 'json' };
 
 export function createCamera() {
+    const aspectRatio = window.innerWidth / window.innerHeight;
+
     const camera = new THREE.PerspectiveCamera(
         CONFIG.cameraProperties.fov,
-        CONFIG.cameraProperties.aspect,
+        aspectRatio,
         CONFIG.cameraProperties.near,
         CONFIG.cameraProperties.far);
 

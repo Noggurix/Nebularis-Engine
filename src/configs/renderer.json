@@ -1,8 +1,5 @@
 {
-    "renderer": { "antialias": true },
-    "skybox": [
-    "src/textures/skybox/posX.jpg", "src/textures/skybox//negX.jpg",
-    "src/textures/skybox//posY.jpg", "src/textures/skybox//negY.jpg",
-    "src/textures/skybox//posZ.jpg", "src/textures/skybox//negZ.jpg"
-    ]
+  "renderer": {
+    "antialias": true
+  }
 }

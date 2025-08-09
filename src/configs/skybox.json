@@ -1,0 +1,7 @@
+{
+    "skybox": [
+    "/textures/skybox/posX.jpg", "/textures/skybox/negX.jpg",
+    "/textures/skybox/posY.jpg", "/textures/skybox/negY.jpg",
+    "/textures/skybox/posZ.jpg", "/textures/skybox/negZ.jpg"
+    ]
+}

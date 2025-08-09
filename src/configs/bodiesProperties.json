@@ -1,0 +1,89 @@
+{
+  "planetScaleFactor": 100,
+  "celestialBodiesProperties": [
+    {
+      "name": "Sun",
+      "texture": "/textures/sun/sun.jpg",
+      "size": 30,
+      "type": "star"
+    },
+    {
+      "name": "Mercury",
+      "texture": "/textures/mercury/mercury.jpg",
+      "distance": 0.387,
+      "size": 0.5,
+      "period": 88,
+      "type": "planet"
+    },
+    {
+      "name": "Venus",
+      "texture": "/textures/venus/venus.jpg",
+      "distance": 0.722,
+      "size": 0.9,
+      "period": 225,
+      "type": "planet"
+    },
+    {
+      "name": "Earth",
+      "texture": "/textures/earth/earth_daymap.jpg",
+      "distance": 1.0,
+      "size": 1.5,
+      "period": 365.25,
+      "type": "planet"
+    },
+    {
+      "name": "Mars",
+      "texture": "/textures/mars/mars.jpg",
+      "distance": 1.52,
+      "size": 0.77,
+      "period": 687,
+      "type": "planet"
+    },
+    {
+      "name": "Jupiter",
+      "texture": "/textures/jupiter/jupiter.jpg",
+      "distance": 5.2,
+      "size": 14.5,
+      "period": 4333,
+      "type": "planet"
+    },
+    {
+      "name": "Saturn",
+      "texture": "/textures/saturn/saturn.jpg",
+      "distance": 9.58,
+      "size": 12.5,
+      "period": 10759,
+      "type": "planet"
+    },
+    {
+      "name": "Uranus",
+      "texture": "/textures/uranus/uranus.jpg",
+      "distance": 14.2,
+      "size": 3.87,
+      "period": 30687,
+      "type": "planet"
+    },
+    {
+      "name": "Neptune",
+      "texture": "/textures/neptune/neptune.jpg",
+      "distance": 20.1,
+      "size": 3.69,
+      "period": 60190,
+      "type": "planet"
+    },
+    {
+      "name": "Moon",
+      "texture": "/textures//moon/moon.jpg",
+      "size": 0.40,
+      "type": "moon"
+    },
+    {
+      "name": "Saturn Ring",
+      "texture": "/textures/saturn/saturn_ring.png",
+      "innerRadius": 16.6,
+      "outerRadius": 29.5,
+      "thetaSegments": 128,
+      "type": "ring"
+    }
+  ]
+}

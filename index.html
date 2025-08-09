@@ -3,22 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solar System</title>
-  <link rel="stylesheet" href="css/styles.css">
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.js",
-        "stats": "https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js",
-        "UnrealBloomPass": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/postprocessing/UnrealBloomPass.js",
-        "EffectComposer": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/postprocessing/EffectComposer.js",
-        "RenderPass": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/postprocessing/RenderPass.js"
-      }
-    }
-  </script>
+  <title>Nebularis Engine</title>
+  <link rel="icon" type="image/png" href="/logo/nebularis_icon.png" />
+  <link rel="stylesheet" href="/styles/global.css" />
 </head>
 <body>
   <div id="solar-system"></div>
-  <script type="module" src="src/main.js"></script>
+  <div id="loading-screen">
+    <div class="loading-text"> Loading <span id="current-item">...</span></div>
+    <div class="progress-bar-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
