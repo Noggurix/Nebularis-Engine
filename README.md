@@ -1,5 +1,5 @@
 <div align="center">
-   <img src="public/nebularis_logo.png" alt="Nebularis" width="100" style="margin-top: 4px;">
+   <img src="public/logo.png" alt="Nebularis" width="100" style="margin-top: 4px;">
 
    <h3 style="margin-top: 1px; margin-bottom: 0px; color: #e2e2e2ff; font-family: 'Times', sans-serif;">Nebularis Engine</h3><br>
 
