@@ -25,7 +25,7 @@ export function createSun (scene: THREE.Scene, textureMap: Record<string, THREE.
         emissiveIntensity: 0.8
     });
 
-    const sun = new THREE.Mesh(new THREE.SphereGeometry(30, 64, 64), sunMaterial);
+    const sun = new THREE.Mesh(new THREE.SphereGeometry(30, 32, 32), sunMaterial);
     scene.add(sun);
 
     const sunLight = new THREE.PointLight(0xffeaab, 0.3, 10000, 0);
@@ -33,23 +33,37 @@ export function createSun (scene: THREE.Scene, textureMap: Record<string, THREE.
     scene.add(sunLight);
 }
 
-export function createAllPlanets (scene: THREE.Scene, textureMap: Record<string, THREE.Texture>): THREE.Mesh[] {
+export function createAllPlanets (scene: THREE.Scene, textureMap: Record<string, THREE.Texture>): THREE.LOD[] {
         const moonData: CelestialBody = getCelestialBodyOrThrow('Moon');
         const saturnRingData: CelestialBody = getCelestialBodyOrThrow('Saturn Ring');
 
-        const currentObjects: THREE.Mesh[] = configTyped.celestialBodiesProperties
+        const currentObjects: THREE.LOD[] = configTyped.celestialBodiesProperties
            .filter((body): body is CelestialBody => body.type === 'planet')
             .map((planet: CelestialBody) => {
-                const planetMaterial = new THREE.MeshStandardMaterial({ map: textureMap[planet.name]});
-        
-                const objPlanet = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 64, 64), planetMaterial);
-                objPlanet.name = planet.name;
+
+                const lod = new THREE.LOD();
+
+                const planetMaterial = new THREE.MeshStandardMaterial({ map: textureMap[planet.name] });
+
+                const highDetail = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 32, 32), planetMaterial);
+                const midDetail = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 16, 16), planetMaterial);
+                const lowDetail = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 8, 8), planetMaterial);
+
+                highDetail.name = planet.name + "_high";
+                midDetail.name = planet.name + "_mid";
+                lowDetail.name = planet.name + "_low";
+
+                lod.addLevel(highDetail, 0);
+                lod.addLevel(midDetail, 70);
+                lod.addLevel(lowDetail, 100);
+
+                lod.name = planet.name;
 
                 if (planet.name === "Earth" && moonData) {
                     const moon = createMoon(textureMap, moonData);
                     const moonOrbitGroup = new THREE.Group();
                     moonOrbitGroup.add(moon);
-                    objPlanet.add(moonOrbitGroup);
+                    lod.add(moonOrbitGroup);
 
                     moonOrbitGroup.userData = {
                     orbitRadius: 0.0228 * configTyped.planetScaleFactor,
@@ -62,21 +76,22 @@ export function createAllPlanets (scene: THREE.Scene, textureMap: Record<string,
                     const saturnRing = createSaturnRings(textureMap, saturnRingData);
                     const ringOrbit = new THREE.Group();
                     ringOrbit.add(saturnRing);
-                    objPlanet.add(ringOrbit);
+                    lod.add(ringOrbit);
                 }
 
                 if (planet.distance === undefined || planet.period === undefined) {
                     throw new Error(`Planet ${planet.name} is missing distance or period.`);
                 }
 
-                objPlanet.userData = {
+                lod.userData = {
                     distance: planet.distance * configTyped.planetScaleFactor,
                     angle: Math.random() * Math.PI * 2,
                     speed: (2 * Math.PI) / planet.period / 100
                 };
                 
-                scene.add(objPlanet);
-                return objPlanet;
+                scene.add(lod);
+
+                return lod;
             });
 
     return currentObjects;
@@ -84,7 +99,7 @@ export function createAllPlanets (scene: THREE.Scene, textureMap: Record<string,
 
 function createMoon(textureMap: Record<string, THREE.Texture>, moonData: CelestialBody): THREE.Mesh {
     return new THREE.Mesh(
-        new THREE.SphereGeometry(moonData.size, 64, 64),
+        new THREE.SphereGeometry(moonData.size, 32, 32),
         new THREE.MeshStandardMaterial({ map: textureMap[moonData.name] })
     );
 }
