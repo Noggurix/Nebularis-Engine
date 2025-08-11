@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import Stats from 'stats.js';
 import { createDefaultScene } from './scenes.js';
 import { createCamera } from './camera/camera.js';
-import { createPostProcessing } from './visualEffects.js';
+import { createPostProcessing, POSTPROCESSING_SCALE } from './visualEffects.js';
 import { animateObjects } from './objectsAnimation.js';
 import UnifiedCameraControls from './camera/movimentation.js';
 import CONFIG from './configs/bodiesProperties.json'
@@ -70,10 +70,28 @@ preloadTextures(textureLoader).then((textureMap) => {
     CurrentObjects = result.currentObjects;
 
     cameraControls = new UnifiedCameraControls(camera, scene, renderer.domElement);
-    composer = createPostProcessing(scene, renderer, camera);
+
+    const postProcessing = createPostProcessing(scene, renderer, camera);
+    composer = postProcessing.composer;
+    const bloomPass = postProcessing.bloomPass;
 
     loadingScreen.style.display = 'none';
     start();
+
+    window.addEventListener('resize', () => {
+      if (!camera || !renderer || !composer || !bloomPass) return;
+
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      const w = window.innerWidth * POSTPROCESSING_SCALE;
+      const h = window.innerHeight * POSTPROCESSING_SCALE;
+
+      composer.setSize(w, h);
+      bloomPass.setSize(w, h);
+    });
 }).catch((error) => {
     alert('Error loading textures:' + error);
 });
@@ -88,7 +106,13 @@ function animate() {
     cameraControls.callCameraUpdates();
     animateObjects(CurrentObjects);
 
-    composer.render();
+     CurrentObjects.forEach(obj => {
+      if (obj instanceof THREE.LOD) {
+        obj.update(camera);
+      }
+    });
+
+    composer.render(renderer);
 
     performanceStats.end();
 
@@ -98,10 +122,3 @@ function animate() {
 function start() {
   animate();
 }
-
-window.addEventListener('resize', () => {
-  if (!camera || !renderer) return;
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});

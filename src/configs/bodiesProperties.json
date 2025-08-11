@@ -3,13 +3,13 @@
   "celestialBodiesProperties": [
     {
       "name": "Sun",
-      "texture": "/textures/sun/sun.jpg",
+      "texture": "/src/textures/sun/sun.jpg",
       "size": 30,
       "type": "star"
     },
     {
       "name": "Mercury",
-      "texture": "/textures/mercury/mercury.jpg",
+      "texture": "/src/textures/mercury/mercury.jpg",
       "distance": 0.387,
       "size": 0.5,
       "period": 88,
@@ -17,7 +17,7 @@
     },
     {
       "name": "Venus",
-      "texture": "/textures/venus/venus.jpg",
+      "texture": "/src/textures/venus/venus.jpg",
       "distance": 0.722,
       "size": 0.9,
       "period": 225,
@@ -25,7 +25,7 @@
     },
     {
       "name": "Earth",
-      "texture": "/textures/earth/earth_daymap.jpg",
+      "texture": "/src/textures/earth/earth_daymap.jpg",
       "distance": 1.0,
       "size": 1.5,
       "period": 365.25,
@@ -33,7 +33,7 @@
     },
     {
       "name": "Mars",
-      "texture": "/textures/mars/mars.jpg",
+      "texture": "/src/textures/mars/mars.jpg",
       "distance": 1.52,
       "size": 0.77,
       "period": 687,
@@ -41,7 +41,7 @@
     },
     {
       "name": "Jupiter",
-      "texture": "/textures/jupiter/jupiter.jpg",
+      "texture": "/src/textures/jupiter/jupiter.jpg",
       "distance": 5.2,
       "size": 14.5,
       "period": 4333,
@@ -49,7 +49,7 @@
     },
     {
       "name": "Saturn",
-      "texture": "/textures/saturn/saturn.jpg",
+      "texture": "/src/textures/saturn/saturn.jpg",
       "distance": 9.58,
       "size": 12.5,
       "period": 10759,
@@ -57,7 +57,7 @@
     },
     {
       "name": "Uranus",
-      "texture": "/textures/uranus/uranus.jpg",
+      "texture": "/src/textures/uranus/uranus.jpg",
       "distance": 14.2,
       "size": 3.87,
       "period": 30687,
@@ -65,7 +65,7 @@
     },
     {
       "name": "Neptune",
-      "texture": "/textures/neptune/neptune.jpg",
+      "texture": "/src/textures/neptune/neptune.jpg",
       "distance": 20.1,
       "size": 3.69,
       "period": 60190,
@@ -73,13 +73,13 @@
     },
     {
       "name": "Moon",
-      "texture": "/textures//moon/moon.jpg",
+      "texture": "/src/textures//moon/moon.jpg",
       "size": 0.40,
       "type": "moon"
     },
     {
       "name": "Saturn Ring",
-      "texture": "/textures/saturn/saturn_ring.png",
+      "texture": "/src/textures/saturn/saturn_ring.png",
       "innerRadius": 16.6,
       "outerRadius": 29.5,
       "thetaSegments": 128,
