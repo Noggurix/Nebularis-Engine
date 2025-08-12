@@ -11,13 +11,28 @@
   <link rel="stylesheet" href="/src/styles/global.css" />
 </head>
 <body>
-  <div id="solar-system"></div>
   <div id="loading-screen">
-    <div class="loading-text"> Loading <span id="current-item">...</span></div>
+    <div class="loading-text">Loading... <span id="current-item">...</span></div>
     <div class="progress-bar-container">
       <div id="progress-bar" class="progress-bar"></div>
     </div>
   </div>
+  <div id="panel">
+    <div id="tab-buttons">
+      <button class="tab-button active" data-tab="scene">Loaded</button>
+      <button class="tab-button" data-tab="objects">Explorer</button>
+    </div>
+
+    <div id="tabs">
+      <div class="tab-content active" id="tab-scene">
+        <div id="scene-list"></div>
+      </div>
+
+      <div class="tab-content" id="tab-objects"></div>
+    </div>
+
+  </div>
   <script type="module" src="/src/main.ts"></script>
+  <script type="module" src="/src/uiPanelControl.ts"></script>
 </body>
 </html>

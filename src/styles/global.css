@@ -54,3 +54,49 @@ body {
   border-radius: 10px;
   transition: width 0.5s ease;
 }
+
+#panel {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  right: 0;
+  bottom: 0;
+  width: 18%;
+  height: 200px ;
+  background: rgba(0, 0, 0, 0.9);
+}
+
+#tabs {
+  display: flex;
+  flex: 1;
+}
+
+.tab-content {
+  display: none;
+  flex: 1;
+  padding: 8px 7px;
+  background: rgba(20, 20, 20, 0.9);
+  overflow-y: auto;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+#tab-buttons {
+  display: flex;
+  flex-shrink: 1;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  color: white;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.tab-button.active {
+  border-top: 2px solid rgb(183, 0, 146);
+  background: rgba(20, 20, 20, 0.9);
+}

@@ -5,11 +5,12 @@ import { createCamera } from './camera/camera.js';
 import { createPostProcessing, POSTPROCESSING_SCALE } from './visualEffects.js';
 import { animateObjects } from './objectsAnimation.js';
 import UnifiedCameraControls from './camera/movimentation.js';
-import CONFIG from './configs/bodiesProperties.json'
+import CONFIG from './configs/bodiesProperties.json';
 
 const loadingScreen = document.getElementById('loading-screen') as HTMLElement;
 const progressBar = document.getElementById('progress-bar') as HTMLElement;
 const currentItemText = document.getElementById('current-item') as HTMLElement;
+const sceneList = document.getElementById("scene-list") as HTMLElement;
 
 let geometryLoader: THREE.BufferGeometryLoader;
 let composer: any;
@@ -68,6 +69,7 @@ preloadTextures(textureLoader).then((textureMap) => {
     scene = result.scene;
     renderer = result.renderer;
     CurrentObjects = result.currentObjects;
+    updateItemsPanel();
 
     cameraControls = new UnifiedCameraControls(camera, scene, renderer.domElement);
 
@@ -95,6 +97,19 @@ preloadTextures(textureLoader).then((textureMap) => {
 }).catch((error) => {
     alert('Error loading textures:' + error);
 });
+
+function updateItemsPanel() {
+  if (!sceneList) return;
+  sceneList.innerHTML = "";
+
+  CurrentObjects.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item";
+
+    div.textContent = item.name;
+    sceneList.appendChild(div);
+  });
+}
 
 const performanceStats = new Stats();
 performanceStats.showPanel(0);

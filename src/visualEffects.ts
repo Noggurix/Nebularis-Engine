@@ -4,7 +4,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import postProcessingConfig from './configs/postProcessing.json'
 
-export const POSTPROCESSING_SCALE = 0.75;
+export const POSTPROCESSING_SCALE = 1;
 
 export function createPostProcessing(
     scene: THREE.Scene,

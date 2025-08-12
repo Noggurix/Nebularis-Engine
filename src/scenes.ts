@@ -20,7 +20,6 @@ export function createDefaultScene (
 
     createSun(scene, textureMap);
     const currentObjects = createAllPlanets(scene, textureMap);
-    console.log("Criou a cena");
 
     return { scene, renderer, currentObjects };
 }

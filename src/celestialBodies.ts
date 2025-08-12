@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import CONFIG from './configs/bodiesProperties.json'
+import CONFIG from './configs/bodiesProperties.json';
 import type { CelestialBody, BodiesProperties } from './types/bodies';
 
 const configTyped = CONFIG as BodiesProperties;
