@@ -2,18 +2,22 @@ import * as THREE from 'three';
 import Stats from 'stats.js';
 import { createDefaultScene } from './scenes.js';
 import { createCamera } from './camera/camera.js';
-import { createPostProcessing, POSTPROCESSING_SCALE } from './visualEffects.js';
+import { createPostProcessing, ENABLE_GLOBAL_POSTPROCESSING } from './visualEffects.js';
 import { animateObjects } from './objectsAnimation.js';
+import { moons } from './celestialBodies';
 import UnifiedCameraControls from './camera/movimentation.js';
 import CONFIG from './configs/bodiesProperties.json';
+import { EffectComposer } from 'three/examples/jsm/Addons.js';
 
 const loadingScreen = document.getElementById('loading-screen') as HTMLElement;
 const progressBar = document.getElementById('progress-bar') as HTMLElement;
 const currentItemText = document.getElementById('current-item') as HTMLElement;
 const sceneList = document.getElementById("scene-list") as HTMLElement;
 
-let geometryLoader: THREE.BufferGeometryLoader;
-let composer: any;
+let scene: THREE.Scene;
+let renderer: THREE.WebGLRenderer;
+let camera: THREE.PerspectiveCamera;
+let composer: EffectComposer;
 let cameraControls: any;
 let CurrentObjects: THREE.Object3D[] = [];
 
@@ -30,7 +34,6 @@ const loadingManager = new THREE.LoadingManager(
 );
 
 const textureLoader = new THREE.TextureLoader(loadingManager);
-geometryLoader = new THREE.BufferGeometryLoader(loadingManager);
 
 async function preloadTextures(textureLoader: THREE.TextureLoader): Promise<Record<string, THREE.Texture>> {
   const texturesToLoad = CONFIG.celestialBodiesProperties.map(body => ({
@@ -58,42 +61,23 @@ async function preloadTextures(textureLoader: THREE.TextureLoader): Promise<Reco
   return textureMap;
 }
 
-let scene: THREE.Scene;
-let renderer: THREE.WebGLRenderer;
-let camera: THREE.PerspectiveCamera;
-
 preloadTextures(textureLoader).then((textureMap) => {
-    camera = createCamera();
-    camera.position.set(0, 70, -200);
-    const result = createDefaultScene(textureMap);
-    scene = result.scene;
-    renderer = result.renderer;
-    CurrentObjects = result.currentObjects;
-    updateItemsPanel();
+  const result = createDefaultScene(textureMap);
+  scene = result.scene;
+  renderer = result.renderer;
+  CurrentObjects = result.currentObjects;
 
-    cameraControls = new UnifiedCameraControls(camera, scene, renderer.domElement);
+  updateItemsPanel();
 
-    const postProcessing = createPostProcessing(scene, renderer, camera);
-    composer = postProcessing.composer;
-    const bloomPass = postProcessing.bloomPass;
+  camera = createCamera();
+  cameraControls = new UnifiedCameraControls(camera, scene, renderer.domElement);
 
-    loadingScreen.style.display = 'none';
-    start();
+  const postProcessing = createPostProcessing(scene, renderer, camera);
+  composer = postProcessing.composer;
 
-    window.addEventListener('resize', () => {
-      if (!camera || !renderer || !composer || !bloomPass) return;
+  loadingScreen.style.display = 'none';
+  start();
 
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-
-      renderer.setSize(window.innerWidth, window.innerHeight);
-
-      const w = window.innerWidth * POSTPROCESSING_SCALE;
-      const h = window.innerHeight * POSTPROCESSING_SCALE;
-
-      composer.setSize(w, h);
-      bloomPass.setSize(w, h);
-    });
 }).catch((error) => {
     alert('Error loading textures:' + error);
 });
@@ -116,22 +100,23 @@ performanceStats.showPanel(0);
 document.body.appendChild(performanceStats.dom);
 
 function animate() {
-    performanceStats.begin();
+  performanceStats.begin();
 
-    cameraControls.callCameraUpdates();
-    animateObjects(CurrentObjects);
+  cameraControls.callCameraUpdates();
 
-     CurrentObjects.forEach(obj => {
-      if (obj instanceof THREE.LOD) {
-        obj.update(camera);
-      }
-    });
+  animateObjects(CurrentObjects, moons);
 
-    composer.render(renderer);
+  CurrentObjects.forEach(o => o instanceof THREE.LOD && o.update(camera));
 
-    performanceStats.end();
+  if (ENABLE_GLOBAL_POSTPROCESSING) {
+    composer.render();
+  } else {
+    renderer.render(scene, camera);
+  }
 
-    requestAnimationFrame(animate);
+  performanceStats.end();
+
+  requestAnimationFrame(animate);
 }
 
 function start() {

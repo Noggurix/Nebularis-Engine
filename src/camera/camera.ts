@@ -10,5 +10,7 @@ export function createCamera() {
         CONFIG.cameraProperties.near,
         CONFIG.cameraProperties.far);
 
+    camera.position.set(0, 70, -200);
+
     return camera;
 }

@@ -54,7 +54,27 @@ alt="Nebularis Engine Demo 1">
 
 ---
 ## Usage
-- Navigate the scene using the WASD keys. Hold the left mouse button to rotate the camera, or click on a planet to focus on it.
+##### Controls
+- Move around: WASD keys
+- Rotate camera: Hold left mouse button
+- Focus on a planet: Just click on the desired planet.
+
+##### Tuning
+If you experience reduced performance or simple want to experiment a new look in the project, you can tweak the post-processing settings.
+
+**Flags in** ```(src/visualEffects.ts)``` :
+- ```ENABLE_GLOBAL_POSTPROCESSING``` Toggle all post-processing globally
+
+- ```POSTPROCESSING_ENABLE_BLOOM``` Enable/disable bloom effect
+
+- ```POSTPROCESSING_USE_HDR``` Enable HDR (higher visual fidelity, heavier on GPU)
+
+- ```POSTPROCESSING_RESOLUTION_SCALE``` Scale rendering resolution. Low values improve performance, while higher decrease performance
+
+- ```POSTPROCESSING_BLOOM_RES_SCALE``` Scale bloom effect resolution. Same logic as resolution scale
+
+You can also adjust post-processing values in ```src/configs/postProcessing.json```.
+The defaults are tuned to provide a balanced bloom intensity that matches the Sun in the scene, but feel free to experiment on your own machine if you’d like to explore different visuals or performance profiles.
 
 ---
 ## Roadmap

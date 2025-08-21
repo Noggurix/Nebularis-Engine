@@ -3,6 +3,7 @@ import CONFIG from './configs/bodiesProperties.json';
 import type { CelestialBody, BodiesProperties } from './types/bodies';
 
 const configTyped = CONFIG as BodiesProperties;
+export const moons: THREE.Group[] = [];
 
 export function getCelestialBodyOrThrow(name: string): CelestialBody {
   const body = configTyped.celestialBodiesProperties.find(b => b.name === name);
@@ -22,7 +23,8 @@ export function createSun (scene: THREE.Scene, textureMap: Record<string, THREE.
         map: texture,
         emissiveMap: texture,
         emissive: new THREE.Color(0xffcc33),
-        emissiveIntensity: 0.8
+        emissiveIntensity: 0.8,
+        transparent: false
     });
 
     const sun = new THREE.Mesh(new THREE.SphereGeometry(30, 32, 32), sunMaterial);
@@ -34,65 +36,70 @@ export function createSun (scene: THREE.Scene, textureMap: Record<string, THREE.
 }
 
 export function createAllPlanets (scene: THREE.Scene, textureMap: Record<string, THREE.Texture>): THREE.LOD[] {
-        const moonData: CelestialBody = getCelestialBodyOrThrow('Moon');
-        const saturnRingData: CelestialBody = getCelestialBodyOrThrow('Saturn Ring');
+    const moonData: CelestialBody = getCelestialBodyOrThrow('Moon');
+    const saturnRingData: CelestialBody = getCelestialBodyOrThrow('Saturn Ring');
 
-        const currentObjects: THREE.LOD[] = configTyped.celestialBodiesProperties
-           .filter((body): body is CelestialBody => body.type === 'planet')
-            .map((planet: CelestialBody) => {
-
-                const lod = new THREE.LOD();
-
-                const planetMaterial = new THREE.MeshStandardMaterial({ map: textureMap[planet.name] });
-
-                const highDetail = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 32, 32), planetMaterial);
-                const midDetail = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 16, 16), planetMaterial);
-                const lowDetail = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 8, 8), planetMaterial);
-
-                highDetail.name = planet.name + "_high";
-                midDetail.name = planet.name + "_mid";
-                lowDetail.name = planet.name + "_low";
-
-                lod.addLevel(highDetail, 0);
-                lod.addLevel(midDetail, 70);
-                lod.addLevel(lowDetail, 100);
-
-                lod.name = planet.name;
-
-                if (planet.name === "Earth" && moonData) {
-                    const moon = createMoon(textureMap, moonData);
-                    const moonOrbitGroup = new THREE.Group();
-                    moonOrbitGroup.add(moon);
-                    lod.add(moonOrbitGroup);
-
-                    moonOrbitGroup.userData = {
-                    orbitRadius: 0.0228 * configTyped.planetScaleFactor,
-                    angle: Math.random() * Math.PI * 2,
-                    speed: (2 * Math.PI) / 27.3 / 100
-                    };
-                }
-                
-                if (planet.name === "Saturn" && saturnRingData) {
-                    const saturnRing = createSaturnRings(textureMap, saturnRingData);
-                    const ringOrbit = new THREE.Group();
-                    ringOrbit.add(saturnRing);
-                    lod.add(ringOrbit);
-                }
-
-                if (planet.distance === undefined || planet.period === undefined) {
-                    throw new Error(`Planet ${planet.name} is missing distance or period.`);
-                }
-
-                lod.userData = {
-                    distance: planet.distance * configTyped.planetScaleFactor,
-                    angle: Math.random() * Math.PI * 2,
-                    speed: (2 * Math.PI) / planet.period / 100
-                };
-                
-                scene.add(lod);
-
-                return lod;
+    const currentObjects: THREE.LOD[] = configTyped.celestialBodiesProperties
+        .filter((body): body is CelestialBody => body.type === 'planet')
+        .map((planet: CelestialBody) => {
+            const planetMaterial = new THREE.MeshStandardMaterial({
+                map: textureMap[planet.name],
+                transparent: false
             });
+
+            const highDetail = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 32, 32), planetMaterial);
+            const midDetail = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 16, 16), planetMaterial);
+            const lowDetail = new THREE.Mesh(new THREE.SphereGeometry(planet.size, 8, 8), planetMaterial);
+
+            highDetail.name = planet.name + "_high";
+            midDetail.name = planet.name + "_mid";
+            lowDetail.name = planet.name + "_low";
+
+            const lod = new THREE.LOD();
+
+            lod.addLevel(highDetail, 0);
+            lod.addLevel(midDetail, 70);
+            lod.addLevel(lowDetail, 100);
+
+            lod.name = planet.name;
+
+            if (planet.name === "Earth" && moonData) {
+                const moon = createMoon(textureMap, moonData);
+                const moonOrbitGroup = new THREE.Group();
+                moonOrbitGroup.add(moon);
+                scene.add(moonOrbitGroup);
+
+                moonOrbitGroup.userData = {
+                orbitRadius: 0.0228 * configTyped.planetScaleFactor,
+                angle: Math.random() * Math.PI * 2,
+                speed: (2 * Math.PI) / 27.3 / 100,
+                earthLOD: lod
+                };
+
+                moons.push(moonOrbitGroup);
+            }
+            
+            if (planet.name === "Saturn" && saturnRingData) {
+                const saturnRing = createSaturnRings(textureMap, saturnRingData);
+                const ringOrbit = new THREE.Group();
+                ringOrbit.add(saturnRing);
+                lod.add(ringOrbit);
+            }
+
+            if (planet.distance === undefined || planet.period === undefined) {
+                throw new Error(`Planet ${planet.name} is missing distance or period.`);
+            }
+
+            lod.userData = {
+                distance: planet.distance * configTyped.planetScaleFactor,
+                angle: Math.random() * Math.PI * 2,
+                speed: (2 * Math.PI) / planet.period / 100
+            };
+            
+            scene.add(lod);
+
+            return lod;
+        });
 
     return currentObjects;
 }

@@ -2,36 +2,63 @@ import * as THREE from 'three'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import postProcessingConfig from './configs/postProcessing.json'
+import VFX_CONFIG from './configs/postProcessing.json'
 
-export const POSTPROCESSING_SCALE = 1;
+export const ENABLE_GLOBAL_POSTPROCESSING = true;
+export const POSTPROCESSING_ENABLE_BLOOM = true;
+export const POSTPROCESSING_USE_HDR = true;
+export const POSTPROCESSING_RESOLUTION_SCALE = 1.5;
+export const POSTPROCESSING_BLOOM_RES_SCALE = 1;
 
 export function createPostProcessing(
     scene: THREE.Scene,
     renderer: THREE.WebGLRenderer,
     camera: THREE.PerspectiveCamera
-): { composer: EffectComposer, bloomPass: UnrealBloomPass } {
-    const renderTarget = new THREE.WebGLRenderTarget(
-      window.innerWidth  * POSTPROCESSING_SCALE,
-      window.innerHeight  * POSTPROCESSING_SCALE,
-      {
-        minFilter: THREE.LinearFilter,
-        magFilter: THREE.LinearFilter,
-        format: THREE.RGBAFormat,
-        stencilBuffer: false,
-      }
-    );
+): { 
+  composer: EffectComposer, 
+  bloomPass?: UnrealBloomPass
+} {
+  const renderTarget = new THREE.WebGLRenderTarget(
+    window.innerWidth * POSTPROCESSING_RESOLUTION_SCALE,
+    window.innerHeight * POSTPROCESSING_RESOLUTION_SCALE,
+    {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      format: THREE.RGBAFormat,
+      type: POSTPROCESSING_USE_HDR ? THREE.HalfFloatType : THREE.UnsignedByteType,
+      stencilBuffer: false,
+      depthBuffer: true
+    }
+  );
 
-    const composer = new EffectComposer(renderer, renderTarget);
+  const renderPass = new RenderPass(scene, camera);
+  const composer = new EffectComposer(renderer, renderTarget); 
+  composer.addPass(renderPass); 
 
-    composer.addPass(new RenderPass(scene, camera));
-    const bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2),
-        postProcessingConfig.bloom.strength, 
-        postProcessingConfig.bloom.radius, 
-        postProcessingConfig.bloom.threshold
-    );
+  let bloomPass: UnrealBloomPass | undefined = undefined;
+  
+  if (POSTPROCESSING_ENABLE_BLOOM) {
+      bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(
+          window.innerWidth * POSTPROCESSING_BLOOM_RES_SCALE,
+          window.innerHeight * POSTPROCESSING_BLOOM_RES_SCALE
+        ),
+        VFX_CONFIG.bloom.strength, 
+        VFX_CONFIG.bloom.radius, 
+        VFX_CONFIG.bloom.threshold
+      );
     composer.addPass(bloomPass);
+  }
 
-    return { composer, bloomPass };
+  window.addEventListener('resize', () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    renderer.setSize(width, height);
+    composer.setSize(width, height);
+
+    if (bloomPass) bloomPass.setSize(width, height);
+  });
+
+  return { composer, bloomPass };
 }

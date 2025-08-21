@@ -1,15 +1,13 @@
 let lastTime = 0;
 
-export function animateObjects(planetIteration) {
+export function animateObjects(planetIteration, moons) {
     const deltaTime = getDeltaTime();
-    
+
     planetIteration.forEach(objPlanet => {
         animatePlanetOrbit(objPlanet, deltaTime);
-
-        if (objPlanet.name === "Earth") {
-            animateEarthMoon(objPlanet, deltaTime);
-        }
     });
+
+    animateMoons(moons, deltaTime);
 }
 
 function getDeltaTime() {
@@ -26,13 +24,16 @@ function animatePlanetOrbit(planet, deltaTime) {
     planet.position.z = Math.sin(data.angle) * data.distance;
 }
 
-function animateEarthMoon(earth, deltaTime) {
-    if (earth.children.length > 0) {
-        const moonOrbitGroup = earth.children[0];
+function animateMoons(moons, deltaTime) {
+    moons.forEach(moonOrbitGroup => {
         const moonData = moonOrbitGroup.userData;
+        const earthLOD = moonData.earthLOD;
+
+        if (!earthLOD) return;
 
         moonData.angle += moonData.speed * deltaTime;
-        moonOrbitGroup.position.x = Math.cos(moonData.angle) * moonData.orbitRadius;
-        moonOrbitGroup.position.z = Math.sin(moonData.angle) * moonData.orbitRadius;
-    }
+
+        moonOrbitGroup.position.x = earthLOD.position.x + Math.cos(moonData.angle) * moonData.orbitRadius;
+        moonOrbitGroup.position.z = earthLOD.position.z + Math.sin(moonData.angle) * moonData.orbitRadius;
+    });
 }

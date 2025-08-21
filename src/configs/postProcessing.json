@@ -1,7 +1,7 @@
 {
-    "bloom": {
-        "strength": 0.9, 
-        "radius": 2.4, 
-        "threshold": 0.1
-    }
+  "bloom": {
+    "strength": 0.9,
+    "radius": 2.4,
+    "threshold": 0.1
+  }
 }
